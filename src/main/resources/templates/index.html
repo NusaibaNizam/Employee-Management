@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Employee Management</title>
+<link rel="stylesheet" th:href="@{/style.css}">
+<script src="https://kit.fontawesome.com/4980624997.js"
+	crossorigin="anonymous"></script>
+
+</head>
+<body>
+	<div class="table_container">
+		<div sec:authorize="isAuthenticated()">
+			Welcome <b><span sec:authentication="name">Username</span></b> &nbsp;
+			<i><span sec:authentication="principal.authorities">Roles</span></i>
+		</div>
+
+		<form sec:authorize="isAuthenticated()" th:action="@{/logout}"
+			method="post">
+			<input type="submit" value="Logout" />
+		</form>
+
+
+		<h1>Employee Manager</h1>
+		<a sec:authorize="isAnonymous()" href="/login"  class="white">Login</a>
+		<div sec:authorize="hasAnyAuthority('admin', 'employee')">
+			<a href="add_employee"  class="white">Add Employee</a>
+		</div>
+
+		<br />
+		<br />
+		<table cellpadding="10">
+			<thead>
+				<tr class="tr_head">
+					<th>Employee Id</th>
+					<th>Name</th>
+					<th>Email</th>
+					<th>Joining Date</th>
+					<th>Address</th>
+
+					<th sec:authorize="hasAnyAuthority('admin', 'employee')">Actions</th>
+
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="user : ${urerList}" class="tr_data">
+					<td th:text="${user.id}"/>
+					<td th:text="${user.name}"/>
+					<td th:text="${user.email}"/>
+					<td th:text="${user.joiningDate}"/>
+					<td th:text="${user.address}"/>
+
+					<td sec:authorize="hasAnyAuthority('admin', 'employee')" class="form_td">
+					<form action="/edit_employee" method="post" th:if="${current_user.role == 'admin' || (current_user.role == 'employee' && user.id==current_user.id)}">
+						<input type="hidden" th:value="${user.id}" name="id" />
+						<input type="submit" value="update"  class="linkbtnform">
+					</form>
+					<form action="/delete_employee" method="post" th:if="${current_user.role == 'admin' && user.id!=current_user.id}">
+						<input type="hidden" th:value="${user.id}" name="id" />
+						<input type="submit" value="delete"  class="linkbtnform">
+					</form>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
